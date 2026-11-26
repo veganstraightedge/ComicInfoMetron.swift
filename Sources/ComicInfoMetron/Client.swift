@@ -26,6 +26,11 @@ struct Client: Sendable {
     return page.results
   }
 
+  /// One issue, credits and all.
+  func issue(_ id: Int) async throws -> Responses.Issue {
+    try await get("issue/\(id)/", [:])
+  }
+
   /// Calls one API resource and decodes its response.
   private func get<Response: Decodable>(_ path: String, _ parameters: [String: String]) async throws -> Response {
     var components = URLComponents(url: Self.baseURL.appending(path: path), resolvingAgainstBaseURL: false)!

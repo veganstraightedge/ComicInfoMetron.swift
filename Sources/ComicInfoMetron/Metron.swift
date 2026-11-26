@@ -17,7 +17,7 @@ import Foundation
 ///
 /// Metron's terms: whatever shows its data credits and links back to it.
 /// An API token comes with a free account: https://metron.cloud
-public struct Metron {
+public struct Metron: ComicInfo.MetadataSource {
   public let name = "Metron"
   public let homeURL = URL(string: "https://metron.cloud/")!
 
@@ -44,6 +44,12 @@ public struct Metron {
     let number = Self.nonBlank(issue.number) ?? ""
     let found = try await client.findIssues(series: series, number: number, coverYear: issue.year)
     return found.map(Self.match).ranked(for: issue)
+  }
+
+  public func issue(for match: ComicInfo.Match) async throws -> ComicInfo.Issue {
+    guard let id = Int(match.id) else { throw MetronError.invalidIssueID(match.id) }
+    let found = try await client.issue(id)
+    return IssueMapping(issue: found).issue
   }
 
   /// One issue from the issue list as a match.

@@ -48,6 +48,74 @@ struct MetronTests {
     #expect(matches.map(\.series) == ["Saga", "Saga of the Swamp Thing"])
   }
 
+  @Test func testTheIssueHasEverythingMetronKnows() async throws {
+    let match = try #require(try await metron.matches(for: issue).first)
+    let found = try await metron.issue(for: match)
+
+    #expect(found.series == "Saga")
+    #expect(found.volume == 1)
+    #expect(found.number == "1")
+    #expect(found.title == "Chapter One")
+    #expect(found.count == nil)
+    #expect(found.year == 2012)
+    #expect(found.month == 3)
+    #expect(found.day == nil)
+    #expect(found.publisher == "Image")
+    #expect(found.imprint == nil)
+    #expect(found.summary == "Two soldiers from opposite sides of a never-ending galactic war fall in love.")
+    #expect(found.genres == ["Fantasy", "Science Fiction"])
+    #expect(found.webLinks == ["https://metron.cloud/issue/saga-2012-1/"])
+  }
+
+  @Test func testCreditsGoToTheirRoles() async throws {
+    let match = try #require(try await metron.matches(for: issue).first)
+    let found = try await metron.issue(for: match)
+
+    #expect(found.writer == "Brian K. Vaughan")
+    #expect(found.penciller == "Fiona Staples")
+    #expect(found.inker == "Fiona Staples")
+    #expect(found.colorist == nil)
+    #expect(found.letterer == "Fonografiks")
+    #expect(found.coverArtist == "Fiona Staples")
+    #expect(found.editor == "Eric Stephenson")
+    #expect(found.translator == nil)
+  }
+
+  @Test func testCharactersTeamsAndStoryArcs() async throws {
+    let match = try #require(try await metron.matches(for: issue).first)
+    let found = try await metron.issue(for: match)
+
+    #expect(found.characters == ["Alana", "Marko"])
+    #expect(found.teams == [])
+    #expect(found.storyArc == "Chapter One")
+  }
+
+  @Test func testTheFoundIssueOnlyFillsBlanks() async throws {
+    let match = try #require(try await metron.matches(for: issue).first)
+    let found = try await metron.issue(for: match)
+    let mine = ComicInfo.Issue(number: "1", series: "My Saga", writer: "Me")
+
+    let updated = mine.fillingBlanks(from: found)
+
+    #expect(updated.series == "My Saga")
+    #expect(updated.writer == "Me")
+    #expect(updated.publisher == "Image")
+  }
+
+  @Test func testAMatchWithoutAMetronIssueIDIsAnError() async {
+    let match = ComicInfo.Match(id: "saga-2012-1", heading: "Saga (2012) #1", series: "Saga")
+    await #expect(throws: MetronError.invalidIssueID("saga-2012-1")) {
+      try await metron.issue(for: match)
+    }
+  }
+
+  @Test func testAnIssueMetronDoesNotHaveIsNotFound() async {
+    let match = ComicInfo.Match(id: "1", heading: "Nothing #1", series: "Nothing")
+    await #expect(throws: MetronError.httpStatus(404)) {
+      try await metron.issue(for: match)
+    }
+  }
+
   @Test func testAWrongTokenIsUnauthorized() async {
     let wrongToken = Metron(token: "wrong", userAgent: FixtureURLProtocol.userAgent, session: FixtureURLProtocol.session)
     await #expect(throws: MetronError.httpStatus(401)) {
@@ -64,5 +132,6 @@ struct MetronTests {
 
   @Test func testAnHTTPErrorSaysSo() {
     #expect(MetronError.httpStatus(429).localizedDescription == "Metron answered with HTTP status 429.")
+    #expect(MetronError.invalidIssueID("x").localizedDescription == "“x” isn't a Metron issue ID.")
   }
 }
