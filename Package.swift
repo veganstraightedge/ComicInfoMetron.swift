@@ -27,7 +27,8 @@ let package = Package(
     ),
     .testTarget(
       name: "ComicInfoMetronTests",
-      dependencies: ["ComicInfoMetron"]
+      dependencies: ["ComicInfoMetron"],
+      resources: [.copy("Fixtures")]
     ),
   ]
 )

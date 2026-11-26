@@ -36,6 +36,32 @@ public struct Metron {
     return "Metron needs a Series and a Number to search for."
   }
 
+  /// The issues with the issue's number in every series whose name contains its series, best first.
+  ///
+  /// When the issue has a year, only issues with a cover dated that year are asked for.
+  public func matches(for issue: ComicInfo.Issue) async throws -> [ComicInfo.Match] {
+    let series = Self.nonBlank(issue.series) ?? ""
+    let number = Self.nonBlank(issue.number) ?? ""
+    let found = try await client.findIssues(series: series, number: number, coverYear: issue.year)
+    return found.map(Self.match).ranked(for: issue)
+  }
+
+  /// One issue from the issue list as a match.
+  ///
+  /// Metron's issue pages are addressed by a slug, which the list doesn't have, so it has no site URL.
+  private static func match(_ found: Responses.IssueSummary) -> ComicInfo.Match {
+    let series = found.series.name ?? ""
+    let heading = nonBlank(found.displayName) ?? "\(series) #\(found.number ?? "")"
+    return ComicInfo.Match(
+      id: String(found.id),
+      heading: heading,
+      series: series,
+      number: found.number,
+      coverDate: found.coverDate,
+      details: "Cover date " + (nonBlank(found.coverDate) ?? "unknown")
+    )
+  }
+
   static func nonBlank(_ text: String?) -> String? {
     guard let text = text?.trimmingCharacters(in: .whitespacesAndNewlines), !text.isEmpty else { return nil }
     return text
