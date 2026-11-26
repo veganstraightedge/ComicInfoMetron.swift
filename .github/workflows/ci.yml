@@ -1,0 +1,88 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+
+  pull_request:
+
+jobs:
+  test-macos:
+    name: Test on macOS
+    runs-on: xcode-27
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Show Swift version
+        run: swift --version
+
+      - name: Show system info
+        run: |
+          sw_vers
+          uname -m
+
+      - name: Cache Swift dependencies
+        uses: actions/cache@v4
+        with:
+          path: .build
+          key: ${{ runner.os }}-swift-${{ hashFiles('**/Package.swift') }}
+          restore-keys: |
+            ${{ runner.os }}-swift-
+
+      - name: Build package
+        run: swift build --configuration release
+
+      - name: Run tests on macOS
+        run: swift test --parallel
+
+  build-ios:
+    name: Build for iOS
+    runs-on: xcode-27
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build library for iOS
+        run: xcodebuild -scheme ComicInfoMetron-destination "generic/platform=iOS" build
+
+  lint:
+    name: Code Formatting
+    runs-on: xcode-27
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check code formatting
+        run: swift format lint --strict --recursive Sources Tests
+
+  package-validation:
+    name: Package Validation
+    runs-on: xcode-27
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Describe package structure
+        run: swift package describe --type json
+
+      - name: Test package resolution
+        run: swift package resolve
+
+      - name: Show resolved dependencies
+        run: swift package show-dependencies
+
+      - name: Test debug build
+        run: swift build --configuration debug
+
+      - name: Test release build
+        run: swift build --configuration release
+
+      - name: Build the library
+        run: swift build --target ComicInfoMetron--configuration release

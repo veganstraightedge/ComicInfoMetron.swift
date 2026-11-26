@@ -1,0 +1,42 @@
+{
+  "originHash" : "d2aa607928cc2e7e8d21a0e758fdf7280e9a780ade33c7c061f7649fd6c6ab3f",
+  "pins" : [
+    {
+      "identity" : "aexml",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/tadija/AEXML.git",
+      "state" : {
+        "revision" : "d2083adcf4d1383c858f5d3d0f24256459d3f59a",
+        "version" : "4.7.4"
+      }
+    },
+    {
+      "identity" : "comicinfo.swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/veganstraightedge/ComicInfo.swift.git",
+      "state" : {
+        "revision" : "0b795c42bc954cac430311fd0c1927bd1b8c6233",
+        "version" : "1.10.0"
+      }
+    },
+    {
+      "identity" : "swift-argument-parser",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-argument-parser.git",
+      "state" : {
+        "revision" : "6a52f3251125d74daf04fcbd5e6f08a75d074382",
+        "version" : "1.8.2"
+      }
+    },
+    {
+      "identity" : "yams",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/jpsim/Yams.git",
+      "state" : {
+        "revision" : "a27b21e0c81c5bf42049b897a62aaf387e80f279",
+        "version" : "6.2.2"
+      }
+    }
+  ],
+  "version" : 3
+}

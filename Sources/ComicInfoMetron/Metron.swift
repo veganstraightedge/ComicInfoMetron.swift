@@ -1,0 +1,45 @@
+//
+// Metron.swift
+// ComicInfoMetron
+//
+
+import ComicInfo
+import Foundation
+
+/// Looks up comic details in [Metron](https://metron.cloud).
+///
+/// ```swift
+/// let metron = Metron(token: token, userAgent: "MyApp/1.0")
+/// let matches = try await metron.matches(for: issue)
+/// let found = try await metron.issue(for: matches[0])
+/// let updated = issue.fillingBlanks(from: found)
+/// ```
+///
+/// Metron's terms: whatever shows its data credits and links back to it.
+/// An API token comes with a free account: https://metron.cloud
+public struct Metron {
+  public let name = "Metron"
+  public let homeURL = URL(string: "https://metron.cloud/")!
+
+  private let client: Client
+
+  /// - Parameters:
+  ///   - token: The account's Metron API token.
+  ///   - userAgent: Names the app, such as "MyApp/1.0".
+  ///   - session: The URL session requests are made with.
+  public init(token: String, userAgent: String, session: URLSession = .shared) {
+    client = Client(token: token, userAgent: userAgent, session: session)
+  }
+
+  public func missingDetails(for issue: ComicInfo.Issue) -> String? {
+    guard Self.isBlank(issue.series) || Self.isBlank(issue.number) else { return nil }
+    return "Metron needs a Series and a Number to search for."
+  }
+
+  static func nonBlank(_ text: String?) -> String? {
+    guard let text = text?.trimmingCharacters(in: .whitespacesAndNewlines), !text.isEmpty else { return nil }
+    return text
+  }
+
+  private static func isBlank(_ text: String?) -> Bool { nonBlank(text) == nil }
+}
