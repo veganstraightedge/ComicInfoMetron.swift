@@ -47,4 +47,22 @@ struct MetronTests {
 
     #expect(matches.map(\.series) == ["Saga", "Saga of the Swamp Thing"])
   }
+
+  @Test func testAWrongTokenIsUnauthorized() async {
+    let wrongToken = Metron(token: "wrong", userAgent: FixtureURLProtocol.userAgent, session: FixtureURLProtocol.session)
+    await #expect(throws: MetronError.httpStatus(401)) {
+      try await wrongToken.matches(for: issue)
+    }
+  }
+
+  @Test func testAnUnnamedAppIsForbidden() async {
+    let unnamed = Metron(token: FixtureURLProtocol.token, userAgent: "", session: FixtureURLProtocol.session)
+    await #expect(throws: MetronError.httpStatus(403)) {
+      try await unnamed.matches(for: issue)
+    }
+  }
+
+  @Test func testAnHTTPErrorSaysSo() {
+    #expect(MetronError.httpStatus(429).localizedDescription == "Metron answered with HTTP status 429.")
+  }
 }
