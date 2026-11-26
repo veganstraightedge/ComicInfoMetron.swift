@@ -15,8 +15,8 @@ import Foundation
 /// let updated = issue.fillingBlanks(from: found)
 /// ```
 ///
-/// Metron's terms: whatever shows its data credits and links back to it.
-/// An API token comes with a free account: https://metron.cloud
+/// Whatever shows Metron's data credits and links back to it. Requests are made with a Metron
+/// account's API token.
 public struct Metron: ComicInfo.MetadataSource {
   public let name = "Metron"
   public let homeURL = URL(string: "https://metron.cloud/")!
